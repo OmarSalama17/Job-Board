@@ -11,7 +11,7 @@ class JobApplication extends Model
 {
         use HasFactory,HasUuids , SoftDeletes;
 
-    protected $table = 'job_application';
+    protected $table = 'job_applications';
     protected $keyType = 'string';
 
     public $incrementing = false;
