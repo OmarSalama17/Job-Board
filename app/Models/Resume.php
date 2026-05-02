@@ -37,4 +37,11 @@ class Resume extends Model
         ];
     }
 
+        public function user (){
+            return $this->belongsTo(User::class , 'userId' , 'id');
+        }
+
+        public function jobApplication (){
+            return $this->hasMany(JobApplication::class , 'resumeId' , 'id');
+        }
 }
