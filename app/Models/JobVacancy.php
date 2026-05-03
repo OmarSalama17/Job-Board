@@ -47,6 +47,6 @@ class JobVacancy extends Model
 
         public function jobApplication()
     {
-        return $this->hasMany(JobApplication::class, 'jobApplicationId', 'id');
+        return $this->hasMany(JobApplication::class, 'jobVacancyId', 'id');
     }
 }

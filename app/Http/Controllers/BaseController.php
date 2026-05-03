@@ -13,9 +13,8 @@ class BaseController extends Controller
             'message' => $message,
         ];
 
-        // لو البيانات pagination
         if ($data instanceof LengthAwarePaginator) {
-            $response['data'] = $data->items(); // الداتا بس
+            $response['data'] = $data->items();
 
             $response['meta'] = [
                 'current_page' => $data->currentPage(),

@@ -38,8 +38,12 @@ class Company extends Model
     {
         return $this->belongsTo(User::class, 'ownerId', 'id');
     }
-        public function jobVacancies()
+    public function jobVacancies()
     {
-        return $this->belongsTo(JobVacancy::class, 'companyId', 'id');
+        return $this->hasMany(JobVacancy::class, 'companyId', 'id');
+    }
+    public function jobApplication()
+    {
+        return $this->hasManyThrough(JobApplication::class, JobVacancy::class, 'companyId', 'jobVacancyId', 'id', 'id');
     }
 }
