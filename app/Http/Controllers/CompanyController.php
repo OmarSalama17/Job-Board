@@ -66,9 +66,15 @@ class CompanyController extends BaseController
     public function update(CompanyUpdateRequest $request, string $id)
     {
         $validated = $request->validated();
-        $category = Company::findOrFail($id);
-        $category->update($validated);
-        return $this->successResponse($category, "successfully", 200);
+        $company = Company::findOrFail($id);
+        $company->update([
+            'name'=> $validated['name'],
+            'address'=> $validated['address'],
+            'industry'=> $validated['industry'],
+            'website'=> $validated['website'],
+        ]);
+
+        return $this->successResponse($company, "successfully", 200);
     }
 
     /**
@@ -76,14 +82,14 @@ class CompanyController extends BaseController
      */
     public function destroy(string $id)
     {
-        $category = Company::findOrFail($id);
-        $category->delete();
-        return $this->successResponse($category, 'deleted', 200);
+        $company = Company::findOrFail($id);
+        $company->delete();
+        return $this->successResponse($company, 'deleted', 200);
     }
     public function restore(string $id)
     {
-        $category = Company::withTrashed()->findOrFail($id);
-        $category->restore();
-        return $this->successResponse($category, 'restored', 200);
+        $company = Company::withTrashed()->findOrFail($id);
+        $company->restore();
+        return $this->successResponse($company, 'restored', 200);
     }
 }
