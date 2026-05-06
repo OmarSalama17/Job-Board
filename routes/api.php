@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JobCategoryController;
 use App\Http\Controllers\JobVacancyController;
 use Illuminate\Http\Request;
@@ -40,3 +41,5 @@ Route::get('/job-vacancy/{id}', [JobVacancyController::class, 'show']);
 Route::put('/job-vacancy/{id}', [JobVacancyController::class, 'update']);
 Route::delete('/job-vacancy/{id}', [JobVacancyController::class, 'destroy']);
 Route::put('/job-vacancy/{id}/restore', [JobVacancyController::class, 'restore']);
+
+Route::get('/dashboard', [DashboardController::class, 'index']);
