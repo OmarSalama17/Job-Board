@@ -14,13 +14,14 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 
-    Route::middleware('auth:sanctum')->group(function () {
+    });
+    Route::middleware(['auth:sanctum', 'role:admin,company-owner'])->group(function () {
         Route::get('/me', function (Request $request) {
             return $request->user();
         });
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/dashboard', [DashboardController::class, 'index']);
     });
-});
 
 Route::get('/job-categories', [JobCategoryController::class, 'index']);
 Route::post('/job-categories', [JobCategoryController::class, 'store']);
@@ -41,5 +42,3 @@ Route::get('/job-vacancy/{id}', [JobVacancyController::class, 'show']);
 Route::put('/job-vacancy/{id}', [JobVacancyController::class, 'update']);
 Route::delete('/job-vacancy/{id}', [JobVacancyController::class, 'destroy']);
 Route::put('/job-vacancy/{id}/restore', [JobVacancyController::class, 'restore']);
-
-Route::get('/dashboard', [DashboardController::class, 'index']);
