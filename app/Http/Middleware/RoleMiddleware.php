@@ -21,7 +21,7 @@ class RoleMiddleware extends BaseController
             $role = Auth::user()->role;
             $access = in_array($role, $roles);
             if (!$access) {
-                return $this->errorResponse('error' , 'role??' , 403);
+                return $this->errorResponse('unauthorized' , [] , 403);
             }
         }
         return $next($request);

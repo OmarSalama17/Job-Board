@@ -7,6 +7,7 @@ use App\Http\Requests\CompanyUpdateRequest;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class CompanyController extends BaseController
@@ -33,20 +34,20 @@ class CompanyController extends BaseController
     {
         $validated = $request->validated();
         $owner = User::create([
-            'name'=>$validated['owner_name'],
-            'email'=>$validated['owner_email'],
-            'password'=>Hash::make($validated['owner_password']),
-            'role'=>'company-owner'
+            'name' => $validated['owner_name'],
+            'email' => $validated['owner_email'],
+            'password' => Hash::make($validated['owner_password']),
+            'role' => 'company-owner'
         ]);
-        if(!$owner){
-            return $this->errorResponse('error' , [] , 403);
+        if (!$owner) {
+            return $this->errorResponse('error', [], 403);
         }
         $company = Company::create([
-            'name'=>$validated['name'],
-            'address'=>$validated['address'],
-            'industry'=>$validated['industry'],
-            'website'=>$validated['website'],
-            'ownerId'=> $validated['ownerId']
+            'name' => $validated['name'],
+            'address' => $validated['address'],
+            'industry' => $validated['industry'],
+            'website' => $validated['website'],
+            'ownerId' => $validated['ownerId']
         ]);
         return $this->successResponse($company, 'success', 201);
     }
@@ -54,24 +55,25 @@ class CompanyController extends BaseController
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id = null)
     {
-        $company = Company::with('jobVacancies.jobApplication.user')->findOrFail($id);
-        return $this->successResponse($company , "success" , 200);
+        $company = $this->getCompany($id);
+
+        return $this->successResponse($company, "success", 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(CompanyUpdateRequest $request, string $id)
+    public function update(CompanyUpdateRequest $request, string $id = null)
     {
         $validated = $request->validated();
-        $company = Company::findOrFail($id);
+        $company = $this->getCompany($id);
         $company->update([
-            'name'=> $validated['name'],
-            'address'=> $validated['address'],
-            'industry'=> $validated['industry'],
-            'website'=> $validated['website'],
+            'name' => $validated['name'],
+            'address' => $validated['address'],
+            'industry' => $validated['industry'],
+            'website' => $validated['website'],
         ]);
 
         return $this->successResponse($company, "successfully", 200);
@@ -91,5 +93,12 @@ class CompanyController extends BaseController
         $company = Company::withTrashed()->findOrFail($id);
         $company->restore();
         return $this->successResponse($company, 'restored', 200);
+    }
+    private function getCompany(string $id = null)
+    {
+        if ($id) {
+            return Company::findOrFail($id);
+        }
+        return Company::where('ownerId', Auth()->user()->id);
     }
 }

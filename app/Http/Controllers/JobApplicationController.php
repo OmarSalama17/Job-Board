@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\JobApplicationUpdateRequest;
 use App\Models\JobApplication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class JobApplicationController extends BaseController
 {
@@ -14,9 +15,16 @@ class JobApplicationController extends BaseController
     public function index(Request $request)
     {
         $query = JobApplication::latest();
+        if (Auth()->user()->role == 'company-owner') {
+            $query->whereHas('jobVacancy', function ($query) {
+                $query->where('companyId', Auth()->user()->company->id);
+            });
+        }
+
         if ($request->input("archived")) {
             $query->onlyTrashed();
         }
+
         $categories = $query->paginate(2);
         return $this->successResponse(
             $categories,
