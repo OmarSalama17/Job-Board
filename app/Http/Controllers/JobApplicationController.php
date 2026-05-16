@@ -25,9 +25,9 @@ class JobApplicationController extends BaseController
             $query->onlyTrashed();
         }
 
-        $categories = $query->paginate(2);
+        $jobApplications = $query->paginate(2);
         return $this->successResponse(
-            $categories,
+            $jobApplications,
             'success',
             200
         );
@@ -46,7 +46,16 @@ class JobApplicationController extends BaseController
      */
     public function show(string $id)
     {
-        $jobApplication = JobApplication::with('jobVacancies.jobApplication.user')->findOrFail($id);
+        $jobApplication = JobApplication::with(['jobVacancy', 'user'])->findOrFail($id);
+
+        if (auth()->user()->role === 'user') {
+            if ($jobApplication->userId !== auth()->user()->id) {
+                abort(403, 'Unauthorized. You can only view your own applications.');
+            }
+        } else {
+            $this->Unauthorized($jobApplication);
+        }
+
         return $this->successResponse($jobApplication, "success", 200);
     }
 
@@ -56,9 +65,11 @@ class JobApplicationController extends BaseController
     public function update(JobApplicationUpdateRequest $request, string $id)
     {
         $jobApplication = JobApplication::findOrFail($id);
+        $this->Unauthorized($jobApplication);
         $jobApplication->update([
             'status' => $request->input('status')
         ]);
+        return $this->successResponse($jobApplication, "successfully", 200);
     }
 
     /**
@@ -67,13 +78,25 @@ class JobApplicationController extends BaseController
     public function destroy(string $id)
     {
         $jobApplication = JobApplication::findOrFail($id);
+        $this->Unauthorized($jobApplication);
         $jobApplication->delete();
         return $this->successResponse($jobApplication, 'deleted', 200);
     }
     public function restore(string $id)
     {
         $jobApplication = JobApplication::withTrashed()->findOrFail($id);
+        $this->Unauthorized($jobApplication);
         $jobApplication->restore();
         return $this->successResponse($jobApplication, 'restored', 200);
+    }
+    private function Unauthorized($jobApplication)
+    {
+        if (auth()->user()->role === 'admin') {
+            return;
+        }
+
+        if ($jobApplication->jobVacancy->company->ownerId !== auth()->id) {
+            abort(403, 'Unauthorized action. You cannot perform this action on this application.');
+        }
     }
 }

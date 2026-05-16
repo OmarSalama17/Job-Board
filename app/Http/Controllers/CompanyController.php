@@ -7,7 +7,6 @@ use App\Http\Requests\CompanyUpdateRequest;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class CompanyController extends BaseController
@@ -19,9 +18,9 @@ class CompanyController extends BaseController
         if ($request->input("archived")) {
             $query->onlyTrashed();
         }
-        $categories = $query->paginate(2);
+        $companies = $query->paginate(2);
         return $this->successResponse(
-            $categories,
+            $companies,
             'success',
             200
         );
@@ -85,12 +84,14 @@ class CompanyController extends BaseController
     public function destroy(string $id)
     {
         $company = Company::findOrFail($id);
+        $this->Unauthorized($company);
         $company->delete();
         return $this->successResponse($company, 'deleted', 200);
     }
     public function restore(string $id)
     {
         $company = Company::withTrashed()->findOrFail($id);
+        $this->Unauthorized($company);
         $company->restore();
         return $this->successResponse($company, 'restored', 200);
     }
@@ -99,6 +100,17 @@ class CompanyController extends BaseController
         if ($id) {
             return Company::findOrFail($id);
         }
-        return Company::where('ownerId', Auth()->user()->id);
+        return Company::where('ownerId', Auth()->user()->id)->first();
+    }
+    private function Unauthorized($company)
+    {
+        if (auth()->user()->role === 'admin') {
+            return;
+        }
+
+        if ($company->ownerId !== auth()->user()->id) {
+            abort(403, 'Unauthorized action. You cannot perform this action on this company.');
+        }
     }
 }
+
